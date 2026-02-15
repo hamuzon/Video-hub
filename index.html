@@ -218,7 +218,7 @@
                 </div>
             </a>
 
-            <a href="./Video_Player/index.html" class="nav-item">
+            <a href="./Video_Player/index.html" class="nav-item offset">
                 <span class="card-num">04</span>
                 <div class="card-content">
                     <h3>Video Player<br>Tool</h3>
@@ -236,7 +236,7 @@
         <div class="footer-content" id="footer-copy">
             &copy; <span id="year"></span> Video Player HUB <span class="footer-separator">|</span> 
             <br>
-            <a href="https://hamuzon.web.fc2.com" target="_blank" rel="noopener noreferrer">@hamuzon</a>
+            <a href="https://hamuzon.github.io" target="_blank" rel="noopener noreferrer">Video Player HUB</a>
         </div>
     </footer>
 
@@ -265,10 +265,17 @@
         const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
         function updateFavicon(e) {
+            const hostname = location.hostname;
+            let baseUrl = '';
+            if (hostname === 'hamuzon.github.io') {
+                baseUrl = 'https://hamuzon.github.io/Video-hub/';
+            } else if (hostname === 'home.hamusata.f5.si') {
+                baseUrl = 'https://home.hamusata.f5.si/';
+            }
             if (e.matches) {
-                favicon.href = 'icon-dark.svg';
+                favicon.href = baseUrl + 'icon-dark.svg';
             } else {
-                favicon.href = 'icon-light.svg';
+                favicon.href = baseUrl + 'icon-light.svg';
             }
         }
 
@@ -278,5 +285,4 @@
         darkModeMediaQuery.addEventListener('change', updateFavicon);
     </script>
 </body>
-
 </html>
