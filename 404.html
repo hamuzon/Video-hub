@@ -185,8 +185,7 @@ const favicon = document.getElementById('favicon');
 const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
 function updateFavicon(e) {
-    const isGithub = location.hostname === 'hamuzon.github.io';
-    const baseUrl = isGithub ? 'https://hamuzon.github.io/Video-hub/' : '';
+    const baseUrl = 'https://home.hamusata.f5.si/';
     favicon.href = baseUrl + (e.matches ? 'icon-dark.svg' : 'icon-light.svg');
 }
 updateFavicon(darkModeMediaQuery);
