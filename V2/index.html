@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YouTube Video Player</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Potta+One&display=swap" rel="stylesheet">
+  <link id="favicon-light" rel="icon" href="../icon-light.svg" media="(prefers-color-scheme: light)" />
+<link id="favicon-dark" rel="icon" href="../icon-dark.svg" media="(prefers-color-scheme: dark)" />
+
+  <style>
+    :root {
+      --accent-color: #00bcd4;
+      --glass-bg: rgba(255, 255, 255, 0.1);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --input-bg: rgba(0, 0, 0, 0.4);
+      --text-color: #f4ece2;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --accent-color: #d27d60;
+        --glass-bg: rgba(255, 248, 240, 0.8);
+        --glass-border: rgba(210, 125, 96, 0.3);
+        --input-bg: rgba(255, 255, 255, 0.9);
+        --text-color: #3b2f2f;
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Potta One', 'Hiragino Mincho ProN', serif;
+    }
+
+    body {
+      min-height: 100vh;
+      color: var(--text-color);
+      background-color: #0a0a0a;
+      background-image: 
+        radial-gradient(ellipse at 20% 30%, rgba(56, 189, 248, 0.2) 0%, transparent 60%), 
+        radial-gradient(ellipse at 80% 70%, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+      transition: background 0.3s;
+    }
+
+    @media (prefers-color-scheme: light) {
+      body {
+        background-color: #fff8f0;
+        background-image: none;
+      }
+    }
+
+    section {
+      width: 100%;
+      max-width: 900px;
+      padding: 2rem;
+      border-radius: 24px;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(20px);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 1.5rem;
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      max-width: 600px;
+      padding: 14px;
+      border-radius: 14px;
+      border: 2px solid var(--glass-border);
+      background: var(--input-bg);
+      color: var(--text-color);
+      outline: none;
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+
+    input[type="number"] {
+      width: 60px;
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: var(--input-bg);
+      color: var(--text-color);
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    #player-wrapper {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      margin: 20px 0;
+      border-radius: 16px;
+      overflow: hidden;
+      display: none;
+      border: 1px solid var(--glass-border);
+      background: #000;
+    }
+
+    #player {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    #controls {
+      display: none;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 10px 0;
+    }
+
+    button {
+      padding: 10px 18px;
+      border: none;
+      border-radius: 12px;
+      background: var(--glass-border);
+      color: var(--text-color);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--accent-color);
+      color: #fff;
+      transform: translateY(-2px);
+    }
+
+    button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent-color);
+      color: #fff;
+    }
+
+    .btn-wide {
+      min-width: 130px;
+    }
+
+    .speed-btn {
+      min-width: 65px;
+      font-size: 0.8rem;
+      background: rgba(128,128,128,0.1);
+    }
+
+    #time-display {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .time-segment {
+      background: var(--glass-border);
+      padding: 10px;
+      border-radius: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 75px;
+    }
+
+    .time-val {
+      font-size: 2rem;
+      color: var(--accent-color);
+      margin: 5px 0;
+    }
+
+    .time-separator {
+      font-size: 2rem;
+    }
+
+    .step-btn {
+      background: none;
+      padding: 0;
+      min-width: auto;
+      font-size: 1.5rem;
+    }
+
+    .step-btn:hover {
+      background: none;
+      color: var(--accent-color);
+      transform: none;
+    }
+
+    .panel {
+      background: rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      border-radius: 20px;
+      border: 1px solid var(--glass-border);
+      margin-bottom: 20px;
+    }
+
+    .btn-small {
+      font-size: 0.8rem;
+    }
+
+    .speed-info {
+      font-size: 0.9rem;
+      margin-bottom: 12px;
+    }
+
+    .accent-text {
+      color: var(--accent-color);
+    }
+
+    .speed-slider {
+      width: 90%;
+      accent-color: var(--accent-color);
+      margin-top: 15px;
+    }
+
+    #video-thumbnail {
+      width: 100%;
+      max-width: 320px;
+      border-radius: 12px;
+      margin-top: 20px;
+      border: 1px solid var(--glass-border);
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 2rem;
+      font-size: 0.9rem;
+      opacity: 0.7;
+    }
+
+    footer a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <section>
+    <h1>🎬YouTube Video Player🎬</h1>
+    
+    <input type="text" id="youtube-url" placeholder="URL または 動画ID を入力" />
+    
+    <div class="btn-group">
+      <button onclick="loadVideo()" class="btn-primary">▶ 読み込み</button>
+      <button onclick="location.reload()">🔁 リセット</button>
+    </div>
+
+    <div id="player-wrapper">
+      <div id="player"></div>
+    </div>
+
+    <div id="controls">
+      <div class="btn-group">
+        <button id="play-pause-btn" onclick="togglePlayPause()" class="btn-wide">▶ 再生</button>
+        <button onclick="seekSeconds(-15)">⏪ -15s</button>
+        <button onclick="seekSeconds(15)">⏩ +15s</button>
+        <button id="loop-btn" onclick="toggleLoop()">🔁 ループOFF</button>
+      </div>
+
+      <div class="btn-group">
+        <button onclick="changeVolume(-10)">🔉 音量-</button>
+        <button onclick="changeVolume(10)">🔊 音量+</button>
+        <button id="mute-toggle-btn" onclick="toggleMute()">🔇 ミュート</button>
+      </div>
+
+      <div id="time-display">
+        <div class="time-segment">
+          <span class="time-val" id="time-hour">00</span>
+        </div>
+        <span class="time-separator">:</span>
+        <div class="time-segment">
+          <span class="time-val" id="time-minute">00</span>
+        </div>
+        <span class="time-separator">:</span>
+        <div class="time-segment">
+          <span class="time-val" id="time-second">00</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="btn-group">
+          <button onclick="setCurrentTimeToInput()" class="btn-small">📍 時刻を取得</button>
+          <input type="number" id="jump-h" min="0" value="0"> 時
+          <input type="number" id="jump-m" min="0" max="59" value="0"> 分
+          <input type="number" id="jump-s" min="0" max="59" value="0"> 秒
+          <button onclick="jumpToTime()" class="btn-primary">GO</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p class="speed-info">再生速度: <span id="speed-label" class="accent-text">1.00</span>x</p>
+        <div class="btn-group">
+          <button class="speed-btn" onclick="updateSpeed(0.25)">0.25x</button>
+          <button class="speed-btn" onclick="updateSpeed(0.5)">0.5x</button>
+          <button class="speed-btn" onclick="updateSpeed(1.0)">1x</button>
+          <button class="speed-btn" onclick="updateSpeed(1.5)">1.5x</button>
+          <button class="speed-btn" onclick="updateSpeed(1.75)">1.75x</button>
+          <button class="speed-btn" onclick="updateSpeed(2.0)">2x</button>
+          <button class="speed-btn" onclick="updateSpeed(3.0)">3x</button>
+          <button class="speed-btn" onclick="updateSpeed(4.0)">4x</button>
+        </div>
+        <input type="range" id="speed-slider" min="0.25" max="4" step="0.05" value="1" oninput="updateSpeed(this.value)" class="speed-slider" />
+      </div>
+      
+      <img id="video-thumbnail" src="" alt="" />
+    </div>
+  </section>
+
+  <footer id="footer-copy"></footer>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+<script>
+let player;
+let isLoop = false;
+let syncInterval;
+
+// --- 年数自動更新 & フッター制御 ---
+const footer = document.getElementById("footer-copy");
+const baseYear = 2025;
+const currentYear = new Date().getFullYear();
+const yearString = `${baseYear}${currentYear > baseYear ? "~" + currentYear : ""}`;
+const hostname = location.hostname;
+let footerHTML = "";
+
+if (hostname === "hamuzon.github.io") {
+    footerHTML = `&copy; ${yearString} <a class="link" href="https://hamuzon.github.io" target="_blank" rel="noopener noreferrer">@hamuzon</a>`;
+} else if (hostname.includes("hamuzon-jp.f5.si")) {
+    footerHTML = `&copy; ${yearString} <a class="link" href="https://hamuzon-jp.f5.si" target="_blank" rel="noopener noreferrer">@hamuzon</a>`;
+} else if (hostname.includes("hamusata.f5.si")) {
+    footerHTML = `&copy; ${yearString} <a class="link" href="https://hamusata.f5.si" target="_blank" rel="noopener noreferrer">@hamusata</a>`;
+} else {
+    footerHTML = `&copy; ${yearString} Video Player HUB`;
+}
+footer.innerHTML = footerHTML;
+
+/**
+ * 動画ID抽出
+ * 通常URL、Shorts、埋め込みURL、およびサムネイル画像URL(i.ytimg / img.youtube)に対応
+ */
+function extractVideoId(input) {
+  if (!input) return null;
+  input = input.trim();
+
+  // 1. サムネイル画像URLからの抽出
+  // 例: https://i.ytimg.com/vi/ID_HERE/mqdefault.jpg
+  const thumbReg = /(?:i\.ytimg\.com|img\.youtube\.com)\/vi\/([a-zA-Z0-9_-]{11})/;
+  const thumbMatch = input.match(thumbReg);
+  if (thumbMatch) return thumbMatch[1];
+
+  // 2. 標準的なYouTube URLからの抽出
+  const youtubeReg = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const youtubeMatch = input.match(youtubeReg);
+  if (youtubeMatch) return youtubeMatch[1];
+
+  // 3. 11桁のID直接入力
+  if (input.length === 11) return input;
+
+  return null;
+}
+
+/**
+ * 動画読み込み
+ * サムネイルドメインをランダムに選択して表示し、プレイヤーを初期化
+ */
+function loadVideo() {
+  const input = document.getElementById('youtube-url').value;
+  const id = extractVideoId(input);
+
+  if (!id) {
+    alert('有効なURLまたは動画IDを入力してください');
+    return;
+  }
+
+  // --- サムネイルサーバーのランダム選択 ---
+  const domains = ['img.youtube.com', 'i.ytimg.com'];
+  const randomDomain = domains[Math.floor(Math.random() * domains.length)];
+  document.getElementById('video-thumbnail').src = `https://${randomDomain}/vi/${id}/mqdefault.jpg`;
+  console.log(`Thumbnail Source: ${randomDomain}`);
+
+  // プレイヤーの初期化・再構築
+  if (player) player.destroy();
+
+  player = new YT.Player('player', {
+    videoId: id,
+    playerVars: {
+      'autoplay': 1,
+      'controls': 1,
+      'rel': 0,
+      'modestbranding': 1,
+      'origin': location.origin
+    },
+    events: {
+      'onReady': onPlayerReady,
+      'onStateChange': onStateChange
+    }
+  });
+}
+
+function onPlayerReady() {
+  document.getElementById('player-wrapper').style.display = 'block';
+  document.getElementById('controls').style.display = 'block';
+  document.getElementById('time-display').style.display = 'flex';
+  startSync();
+}
+
+function onStateChange(e) {
+  const btn = document.getElementById('play-pause-btn');
+  // 再生中(1)なら一時停止表示、それ以外は再生表示
+  if (e.data === 1) {
+    btn.textContent = '⏸ 一時停止';
+  } else {
+    btn.textContent = '▶ 再生';
+  }
+
+  // ループ機能：動画終了(0)時に最初に戻る
+  if (e.data === 0 && isLoop) {
+    player.seekTo(0);
+    player.playVideo();
+  }
+}
+
+/**
+ * 再生時間同期（0.5秒間隔）
+ */
+function startSync() {
+  if (syncInterval) clearInterval(syncInterval);
+  syncInterval = setInterval(() => {
+    if (player && player.getCurrentTime) {
+      const t = player.getCurrentTime();
+      document.getElementById('time-hour').textContent = String(Math.floor(t / 3600)).padStart(2, '0');
+      document.getElementById('time-minute').textContent = String(Math.floor((t % 3600) / 60)).padStart(2, '0');
+      document.getElementById('time-second').textContent = String(Math.floor(t % 60)).padStart(2, '0');
+    }
+  }, 500);
+}
+
+function togglePlayPause() {
+  if (!player) return;
+  const s = player.getPlayerState();
+  if (s === 1) {
+    player.pauseVideo();
+  } else {
+    player.playVideo();
+  }
+}
+
+function seekSeconds(s) {
+  if (!player) return;
+  player.seekTo(player.getCurrentTime() + s, true);
+}
+
+function changeVolume(v) {
+  if (!player) return;
+  const cur = player.getVolume();
+  player.setVolume(Math.min(100, Math.max(0, cur + v)));
+}
+
+function toggleMute() {
+  if (!player) return;
+  const btn = document.getElementById('mute-toggle-btn');
+  if (player.isMuted()) {
+    player.unMute();
+    btn.textContent = '🔇 ミュート';
+  } else {
+    player.mute();
+    btn.textContent = '🔊 解除';
+  }
+}
+
+function toggleLoop() {
+  isLoop = !isLoop;
+  const btn = document.getElementById('loop-btn');
+  btn.textContent = isLoop ? '🔁 ループON' : '🔁 ループOFF';
+  btn.style.color = isLoop ? 'var(--accent-color)' : '';
+}
+
+function updateSpeed(v) {
+  if (!player) return;
+  const s = parseFloat(v);
+  player.setPlaybackRate(s);
+  document.getElementById('speed-label').textContent = s.toFixed(2);
+  document.getElementById('speed-slider').value = s;
+}
+
+function jumpToTime() {
+  if (!player) return;
+  const h = parseInt(document.getElementById('jump-h').value) || 0;
+  const m = parseInt(document.getElementById('jump-m').value) || 0;
+  const s = parseInt(document.getElementById('jump-s').value) || 0;
+  player.seekTo((h * 3600) + (m * 60) + s, true);
+}
+
+function setCurrentTimeToInput() {
+  if (!player) return;
+  const t = player.getCurrentTime();
+  document.getElementById('jump-h').value = Math.floor(t / 3600);
+  document.getElementById('jump-m').value = Math.floor((t % 3600) / 60);
+  document.getElementById('jump-s').value = Math.floor(t % 60);
+}
+
+function adjustTime(unit, delta) {
+  if (!player) return;
+  let diff = 0;
+  if (unit === 'h') diff = delta * 3600;
+  else if (unit === 'm') diff = delta * 60;
+  else if (unit === 's') diff = delta;
+  player.seekTo(player.getCurrentTime() + diff, true);
+}
+
+
+// クリエパス対応
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(location.search)
+  const v = params.get('v')
+  if (v) {
+    const input = document.getElementById('youtube-url')
+    input.value = v
+    loadVideo()
+  }
+})
+
+
+
+</script>
+</body>
+</html>
