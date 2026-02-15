@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 - Not Found</title>
+
+<link id="favicon" rel="icon" href="icon-light.svg" type="image/svg+xml">
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;700&family=Plus+Jakarta+Sans:wght@200;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --bg: #f8f9ff;
+    --text: #3d444a;
+    --accent: #9eabbd;
+    --glass: rgba(255, 255, 255, 0.85);
+    --font-jp: 'Noto Serif JP', serif;
+    --font-en: 'Plus Jakarta Sans', sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: var(--font-jp);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    background-image: 
+        radial-gradient(circle at 10% 20%, #e0eaff 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, #fff0e0 0%, transparent 40%);
+    padding: 40px 20px;
+    text-align: center;
+    line-height: 1.8;
+}
+
+.error-label {
+    font-family: var(--font-en);
+    font-size: 0.75rem;
+    letter-spacing: 0.8em;
+    color: var(--accent);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+h1 {
+    font-family: var(--font-en);
+    font-size: clamp(3.5rem, 12vw, 6rem);
+    font-weight: 200;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+h1 span:nth-child(2) {
+    color: var(--accent);
+    font-style: italic;
+    margin-left: 30px;
+}
+
+.message-box {
+    margin-top: 40px;
+    background: var(--glass);
+    padding: clamp(25px, 5vw, 50px);
+    border-radius: 0 40px 40px 40px;
+    border: 1px solid rgba(255,255,255,1);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 15px 35px rgba(61, 68, 74, 0.05);
+    max-width: 600px;
+    width: 100%;
+    transition: all 0.4s ease;
+}
+
+.message-box:hover {
+    background: #ffffff;
+    box-shadow: 0 30px 60px rgba(158, 171, 189, 0.25);
+    border-color: var(--accent);
+}
+
+.message-box p {
+    font-size: 0.95rem;
+    opacity: 0.85;
+}
+
+.back-button {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 1em 2.5em;
+    text-decoration: none;
+    font-family: var(--font-en);
+    font-weight: 600;
+    color: var(--text);
+    background: var(--glass);
+    border-radius: 0 30px 30px 30px;
+    border: 1px solid rgba(255,255,255,1);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    transition: all 0.4s ease;
+}
+
+.back-button:hover {
+    background: #ffffff;
+    transform: scale(1.03) translateY(-5px);
+    box-shadow: 0 25px 50px rgba(158, 171, 189, 0.25);
+    border-color: var(--accent);
+}
+
+footer {
+    margin-top: 80px;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    font-family: var(--font-en);
+    text-align: center;
+}
+
+footer a {
+    color: var(--accent);
+    text-decoration: none;
+}
+footer a:hover {
+    text-decoration: underline;
+}
+</style>
+</head>
+
+<body>
+
+<div class="error-label">Error</div>
+
+<h1>
+    <span>404</span>
+    <span>Not Found</span>
+</h1>
+
+<div class="message-box">
+    <p>
+        お探しのページは存在しないか、<br>
+        移動または削除された可能性があります。
+    </p>
+    <a id="backLink" class="back-button" href="/">
+        Back to Home
+    </a>
+</div>
+
+<footer id="footer-copy"></footer>
+
+<script>
+// --- 戻るリンク制御 ---
+document.addEventListener('DOMContentLoaded', () => {
+    if (location.hostname === 'hamuzon.github.io') {
+        document.getElementById('backLink').href = 'https://hamuzon.github.io/Video-hub/';
+    }
+});
+
+// --- フッター制御 ---
+const footer = document.getElementById("footer-copy");
+const baseYear = 2025;
+const currentYear = new Date().getFullYear();
+const yearString = `${baseYear}${currentYear > baseYear ? "~" + currentYear : ""}`;
+const hostname = location.hostname;
+
+let footerHTML = "";
+
+if (hostname === "hamuzon.github.io") {
+    footerHTML = `&copy; ${yearString} <a href="https://hamuzon.github.io" target="_blank" rel="noopener noreferrer">@hamuzon</a>`;
+} else if (hostname.includes("hamuzon-jp.f5.si")) {
+            footerHTML = `&copy; ${yearString} <a class="link" href="https://hamuzon-jp.f5.si" target="_blank" rel="noopener noreferrer">@hamuzon</a>`;
+} else if (hostname.includes("hamusata.f5.si")) {
+    footerHTML = `&copy; ${yearString} <a href="https://hamusata.f5.si" target="_blank" rel="noopener noreferrer">@hamusata</a>`;
+} else {
+    footerHTML = `&copy; ${yearString} Video Player HUB`;
+}
+
+footer.innerHTML = footerHTML;
+
+// --- ファビコン自動切替 ---
+const favicon = document.getElementById('favicon');
+const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+function updateFavicon(e) {
+    favicon.href = e.matches ? 'icon-dark.svg' : 'icon-light.svg';
+}
+updateFavicon(darkModeMediaQuery);
+darkModeMediaQuery.addEventListener('change', updateFavicon);
+</script>
+
+</body>
+</html>
