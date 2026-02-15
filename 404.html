@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>404 - Not Found</title>
 
-<link id="favicon" rel="icon" href="icon-light.svg" type="image/svg+xml">
+<link id="favicon" rel="icon" href="" type="image/svg+xml">
 
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@200;700&family=Plus+Jakarta+Sans:wght@200;800&display=swap" rel="stylesheet">
 
@@ -185,7 +185,9 @@ const favicon = document.getElementById('favicon');
 const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
 
 function updateFavicon(e) {
-    favicon.href = e.matches ? 'icon-dark.svg' : 'icon-light.svg';
+    const isGithub = location.hostname === 'hamuzon.github.io';
+    const baseUrl = isGithub ? 'https://hamuzon.github.io/Video-hub/' : '';
+    favicon.href = baseUrl + (e.matches ? 'icon-dark.svg' : 'icon-light.svg');
 }
 updateFavicon(darkModeMediaQuery);
 darkModeMediaQuery.addEventListener('change', updateFavicon);
