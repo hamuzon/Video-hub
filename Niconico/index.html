@@ -137,7 +137,7 @@
 
     <input
       id="nico-input"
-      placeholder="Niconico URL / sm**** / nm**** / so****"
+      placeholder="Niconico URL / sm**** / nm**** / so**** / ss****"
     >
 
     <div class="btn-group">
@@ -180,16 +180,16 @@
 
       value = value.trim()
 
-      const watch = value.match(/nicovideo\.jp\/watch\/((sm|nm|so)\d+)/)
+      const watch = value.match(/(?:nicovideo\.jp\/(?:watch|shorts)\/|nico\.ms\/)((sm|nm|so|ss)\d+)/)
       if (watch) return watch[1]
 
-      const embed = value.match(/embed\/((sm|nm|so)\d+)/)
+      const embed = value.match(/embed\/((sm|nm|so|ss)\d+)/)
       if (embed) return embed[1]
 
-      const param = value.match(/[?&]id=((sm|nm|so)\d+)/)
+      const param = value.match(/[?&]id=((sm|nm|so|ss)\d+)/)
       if (param) return param[1]
 
-      if (/^(sm|nm|so)\d+$/.test(value)) return value
+      if (/^(sm|nm|so|ss)\d+$/.test(value)) return value
 
       return null
     }

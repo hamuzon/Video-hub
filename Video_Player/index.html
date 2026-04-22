@@ -211,7 +211,7 @@
             const yt = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?|shorts)\/|.*[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/.exec(input);
             if (yt) return { type: 'yt', id: yt[1] };
 
-            const nc = /(?:nicovideo\.jp\/watch\/|embed\/|[?&]id=)?((sm|nm|so)\d+)/.exec(input);
+            const nc = /(?:nicovideo\.jp\/(?:watch|shorts)\/|nico\.ms\/|embed\/|[?&]id=)?((sm|nm|so|ss)\d+)/.exec(input);
             if (nc) return { type: 'nico', id: nc[1] };
 
             if (input.length === 11) return { type: 'yt', id: input };
