@@ -44,6 +44,7 @@ jobs:
 
       - name: Inject GA4 and normalization script into HTML
         run: |
+          sudo chown -R "$USER:$USER" ./_site
           cd ./_site
 
           # GA4 タグ (google*.html と挿入済みの HTML は除外)
