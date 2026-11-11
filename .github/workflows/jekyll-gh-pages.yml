@@ -44,30 +44,34 @@ jobs:
 
       - name: Inject GA4 and normalization script into HTML
         run: |
-          sudo chown -R "$USER:$USER" ./_site
           cd ./_site
 
-          # GA4タグを挿入（google*.html と既存GA4タグのあるHTMLは除外）
-          find . -maxdepth 1 -type f -name "*.html" -not -name "google*.html" \
-            -exec sh -c '
-              for file do
-                if ! grep -q "googletagmanager.com/gtag/js" "$file"; then
-                  sed -i "/<head>/a\\
-          <!-- Google tag (gtag.js) -->\\
-          <script async src=\"https://www.googletagmanager.com/gtag/js?id=$GA_MEASUREMENT_ID\"></script>\\
-          <script>\\
-          window.dataLayer = window.dataLayer || [];\\
-          function gtag(){dataLayer.push(arguments);}\\
-          gtag(\"js\", new Date());\\
-          gtag(\"config\", \"$GA_MEASUREMENT_ID\");\\
-          </script>" "$file"
-                fi
-              done
-            ' sh {} +
+          # GA4 タグ (google*.html と挿入済みの HTML は除外)
+          cat > /tmp/ga4.html <<EOF
+          <!-- Google tag (gtag.js) -->
+          <script async src="https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}"></script>
+          <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${GA_MEASUREMENT_ID}');
+          </script>
+          EOF
 
-          # 全てのHTMLファイルの<head>直後に正規化スクリプトを挿入
-          find . -maxdepth 1 -type f -name "*.html" -not -name "google*.html" \
-            -exec sed -i '/<head>/a \  <script>if(window.location.hostname.endsWith(".")){window.location.replace(window.location.href.replace(window.location.hostname,window.location.hostname.slice(0,-1)));}</script>' {} +
+          # 末尾にドットが付いたホスト名を正規化するスクリプト
+          cat > /tmp/normalize.html <<'EOF'
+            <script>if(window.location.hostname.endsWith(".")){window.location.replace(window.location.href.replace(window.location.hostname,window.location.hostname.slice(0,-1)));}</script>
+          EOF
+
+          # サブディレクトリを含むすべての HTML の <head> 直後に挿入
+          find . -type f -name "*.html" -not -name "google*.html" -print0 |
+            while IFS= read -r -d '' file; do
+              if grep -q "googletagmanager.com/gtag/js" "$file"; then
+                sed -i -e '/<head>/r /tmp/normalize.html' "$file"
+              else
+                sed -i -e '/<head>/r /tmp/ga4.html' -e '/<head>/r /tmp/normalize.html' "$file"
+              fi
+            done
 
       - name: Remove sensitive files from deployment artifact
         run: |
